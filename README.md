@@ -1,4 +1,4 @@
 WineQQ Assistant
 ==============
 
-A Bash sript helps you install QQ on Wine.
+A Bash script helps you install QQ on Wine.
