@@ -9,257 +9,228 @@ echo "脚本我将帮你安装QQ 7.3轻聊版"
 echo "安装过程中请保证网络畅通，否则，嘿嘿～"
 echo
 
-if [ -d $HOME/WineQQ-temp ]
-then 
-  true
-else
-  mkdir $HOME/WineQQ-temp
-fi
+check_folders()
+{
+    if [ -d $HOME/WineQQ-temp ]
+    then 
+        true
+    else
+        mkdir $HOME/WineQQ-temp
+    fi
+
+    if [ -d $HOME/.local/share/applications ]
+    then 
+        true
+    else 
+        mkdir -p $HOME/.local/share/applications
+    fi
+
+    if [ -d $HOME/.local/share/icons ]
+    then 
+       true
+    else
+      mkdir $HOME/.local/share/icons/hicolor/256x256/apps
+    fi
+  
+}
+
 
 check_dep()
 {
-  #检查wget
-  if [ -f /usr/bin/wget ]
-  then
-    true
-  else
-    echo
-    echo "没有找到/usr/bin/wget，你装了wget吗？"
-    echo "脚本我不管你有没有装，反正就是要装，装到别的地方链接过去也要链接过去！"
-    echo "不管你是从源里装，还是自己编译。"
-    echo "反正脚本我只认/usr/bin/wget，"
-    echo "别的都不管，不管，不管，不管，不管……"
-    exit 1
-  fi
+    #检查wget
+    if [ -f /usr/bin/wget ]
+    then
+        true
+    else
+        echo
+        echo "没有找到/usr/bin/wget，你装了wget吗？"
+        echo "脚本我不管你有没有装，反正就是要装，装到别的地方链接过去也要链接过去！"
+        echo "不管你是从源里装，还是自己编译。"
+        echo "反正脚本我只认/usr/bin/wget，"
+        echo "别的都不管，不管，不管，不管，不管……"
+        exit 1
+    fi
   
-  #检查winetricks及其依赖是否安装
-  if [ -f /usr/bin/cabextract ]
-  then
-    true
-  else
-    echo
-    echo "没有找到/usr/bin/cabextract，你装了cabexteact吗？"
-    echo "脚本我不管你有没有装，反正就是要装，装到别的地方链接过去也要链接过去！"
-    echo "不管你是从源里装，还是自己编译。"
-    echo "反正脚本我只认/usr/bin/cabextract，"
-    echo "别的都不管，不管，不管，不管，不管……"
-    exit 1
-  fi
-
-  if [ -f /usr/bin/7z ]
-  then
-    true
-  else
-    echo
-    echo "没有找到/usr/bin/7z，你装了p7zip吗？"
-    echo "脚本我不管你有没有装，反正就是要装，装到别的地方链接过去也要链接过去！"
-    echo "不管你是从源里装，还是自己编译。"
-    echo "反正脚本我只认/usr/bin/7z，"
-    echo "别的都不管，不管，不管，不管，不管……"
-    exit 1
-  fi
+    #检查Winetricks的依赖p7zip是否安装
+    if [ -f /usr/bin/cabextract ]
+    then
+        true
+    else
+        echo
+        echo "没有找到/usr/bin/cabextract，你装了cabexteact吗？"
+        echo "脚本我不管你有没有装，反正就是要装，装到别的地方链接过去也要链接过去！"
+        echo "不管你是从源里装，还是自己编译。"
+        echo "反正脚本我只认/usr/bin/cabextract，"
+        echo "别的都不管，不管，不管，不管，不管……"
+        exit 1
+    fi
+    
+    #检查7z
+    if [ -f /usr/bin/7z ]
+    then
+        true
+    else
+        echo
+        echo "没有找到/usr/bin/7z，你装了p7zip吗？"
+        echo "脚本我不管你有没有装，反正就是要装，装到别的地方链接过去也要链接过去！"
+        echo "不管你是从源里装，还是自己编译。"
+        echo "反正脚本我只认/usr/bin/p7zip，"
+        echo "别的都不管，不管，不管，不管，不管……"
+        exit 1
+    fi
   
 }
 
 check_wine()
 {
 
-
-
 get_wine_staging()
 {
-  #下载Wine 1.7.45， 不可以中途逃跑哦
-  echo
-  echo "从Play on Linux网站拿东西，做好心理准备，速度可能不理想哦。"
-  echo "如果你觉得速度太慢，也可以手动下载，比如用浏览器，或者用其他工具下载"
-  echo "完成后，放在你的主目录下的WineQQ-temp文件夹（$WINETMP）下"
-  echo "下载地址：http://wine.playonlinux.com/binaries/linux-x86/PlayOnLinux-wine-1.7.48-staging-linux-x86.pol"
-  if [ -f $WINETMP/PlayOnLinux-wine-1.7.48-staging-linux-x86.pol ]
-  then true
-  else
-    read -p "按回车键继续"
-    if wget http://wine.playonlinux.com/binaries/linux-x86/PlayOnLinux-wine-1.7.48-staging-linux-x86.pol -P $WINETMP -c
-    then 
-      true
-    else
-      echo
-      read -p "下载失败，是否重试（支持断点续传）？(y/n)" ch1
-      if [ $ch1 = "y" ]
- then 
-   get_wine_staging
- else
-   echo
-   echo "那算了。等你心情好的时候，或者手动下载好的时候重新运行这脚本吧。"
-   exit 1
-      fi
-    fi
-  fi
-  
-  #gecko和mono也是关键，如果你不想要，来砍我呀！
-  echo
-  echo "现在开始下载Wine的Gecko模块"
-  echo "如果你觉得速度太慢，也可以手动下载，比如用浏览器，或者用其他工具下载"
-  echo "完成后，放在你的主目录下的WineQQ-temp文件夹（$WINETMP）下"
-  echo "下载地址：http://wine.playonlinux.com/gecko/x86/wine_gecko-2.36-x86.msi"
-  if [ -f $WINETMP/wine_gecko-2.36-x86.msi ]
-   then true
-   else
-    read -p "按回车键继续"
-    if wget http://wine.playonlinux.com/gecko/x86/wine_gecko-2.36-x86.msi -P $WINETMP -c
-   then 
-      true
-   else
+    #下载Wine 1.7.48， 不可以中途逃跑哦
     echo
-    read -p "下载失败，是否重试（支持断点续传）？(y/n)" ch1
-    if [ $ch1 = "y" ]
-    then 
-      get_wine_staging
+    echo "从Play on Linux网站拿东西，做好心理准备，速度可能不理想哦。"
+    echo "如果你觉得速度太慢，也可以手动下载，比如用浏览器，或者用其他工具下载"
+    echo "完成后，放在你的主目录下的WineQQ-temp文件夹（$WINETMP）下"
+    echo "下载地址：http://wine.playonlinux.com/binaries/linux-x86/PlayOnLinux-wine-1.7.48-staging-linux-x86.pol"
+    if [ -f $WINETMP/PlayOnLinux-wine-1.7.48-staging-linux-x86.pol ]
+    then true
     else
-      echo
-      echo "那算了。等你心情好的时候，或者手动下载好的时候重新运行这脚本吧。"
-      exit 1
+        read -p "按回车键继续"
+        if wget http://wine.playonlinux.com/binaries/linux-x86/PlayOnLinux-wine-1.7.48-staging-linux-x86.pol -P $WINETMP -c
+        then 
+            true
+        else
+            echo
+            read -p "下载失败，是否重试（支持断点续传）？(y/n)" ch1
+            if [ $ch1 = "y" ]
+            then 
+                get_wine_staging
+            else
+                echo
+                echo "那算了。等你心情好的时候，或者手动下载好的时候重新运行这脚本吧。"
+                exit 1
+            fi
+        fi
     fi
-   fi
-  fi
   
-  echo
-  echo "现在开始下载Wine的Mono模块"
-  echo "如果你觉得速度太慢，也可以手动下载，比如用浏览器，或者用其他工具下载"
-  echo "完成后，放在你的主目录下的WineQQ-temp文件夹（$WINETMP）下"
-  echo "下载地址：http://jaist.dl.sourceforge.net/project/wine/Wine Mono/4.5.6/wine-mono-4.5.6.msi"
-  if [ -f $WINETMP/wine-mono-4.5.6.msi ]
-   then
-    true
-   else
-    read -p "按回车键继续"
-    if wget http://jaist.dl.sourceforge.net/project/wine/Wine Mono/4.5.6/wine-mono-4.5.6.msi -P $WINETMP -c
-     then 
-      true
-     else
-      echo
-      read -p "下载失败，是否重试（支持断点续传）？(y/n)" ch1
- if [ $ch1 = "y" ]
- then 
-   get_wine_staging
- else
-   echo
-   echo "那算了。等你心情好的时候，或者手动下载好的时候重新运行这脚本吧。"
-   exit 1
- fi
-   fi
-  fi
+    #gecko和mono也是关键，如果你不想要，来砍我呀！
+    echo
+    echo "现在开始下载Wine的Gecko模块"
+    echo "如果你觉得速度太慢，也可以手动下载，比如用浏览器，或者用其他工具下载"
+    echo "完成后，放在你的主目录下的WineQQ-temp文件夹（$WINETMP）下"
+    echo "下载地址：http://wine.playonlinux.com/gecko/x86/wine_gecko-2.36-x86.msi"
+    if [ -f $WINETMP/wine_gecko-2.36-x86.msi ]
+    then 
+        true
+    else
+        read -p "按回车键继续"
+        if wget http://wine.playonlinux.com/gecko/x86/wine_gecko-2.36-x86.msi -P $WINETMP -c
+        then 
+            true
+        else
+            echo
+            read -p "下载失败，是否重试（支持断点续传）？(y/n)" ch1
+            if [ $ch1 = "y" ]
+            then 
+                get_wine_staging
+            else
+                echo
+                echo "那算了。等你心情好的时候，或者手动下载好的时候重新运行这脚本吧。"
+                exit 1
+            fi
+        fi
+    fi
   
-  echo
-  clear
-  echo "很好，都下载完了。现在开始施法～"
-  tar xf $WINETMP/PlayOnLinux-wine-1.7.48-staging-linux-x86.pol -C $WINETMP
-  mv $WINETMP/wineversion $HOME/.wineversion
-  #如果你不想要的话，砍了它
-  mkdir $HOME/.wineversion/1.7.48-staging/share/wine/mono
-  mkdir $HOME/.wineversion/1.7.48-staging/share/wine/gecko
-  cp $WINETMP/wine-mono-4.5.6.msi $HOME/.wineversion/1.7.48-staging/share/wine/mono
-  cp $WINETMP/wine_gecko-2.36-x86.msi $HOME/.wineversion/1.7.48-staging/share/wine/gecko
-  export WINE_EXEC=$HOME/.wineversion/1.7.48-staging/bin
+    echo
+    echo "现在开始下载Wine的Mono模块"
+    echo "如果你觉得速度太慢，也可以手动下载，比如用浏览器，或者用其他工具下载"
+    echo "完成后，放在你的主目录下的WineQQ-temp文件夹（$WINETMP）下"
+    echo "下载地址：http://jaist.dl.sourceforge.net/project/wine/Wine Mono/4.5.6/wine-mono-4.5.6.msi"
+    if [ -f $WINETMP/wine-mono-4.5.6.msi ]
+    then
+        true
+    else
+        read -p "按回车键继续"
+        if wget http://jaist.dl.sourceforge.net/project/wine/Wine Mono/4.5.6/wine-mono-4.5.6.msi -P $WINETMP -c
+        then 
+            true
+        else
+            echo
+            read -p "下载失败，是否重试（支持断点续传）？(y/n)" ch1
+            if [ $ch1 = "y" ]
+            then 
+                get_wine_staging
+            else
+                echo
+                echo "那算了。等你心情好的时候，或者手动下载好的时候重新运行这脚本吧。"
+                exit 1
+            fi
+        fi
+    fi
+  
+    echo
+    clear
+    echo "很好，都下载完了。现在开始施法～"
+    tar xf $WINETMP/PlayOnLinux-wine-1.7.48-staging-linux-x86.pol -C $WINETMP
+    mv $WINETMP/wineversion $HOME/.wineversion
+    #如果你不想要的话，砍了它
+    mkdir $HOME/.wineversion/1.7.48-staging/share/wine/mono
+    mkdir $HOME/.wineversion/1.7.48-staging/share/wine/gecko
+    cp $WINETMP/wine-mono-4.5.6.msi $HOME/.wineversion/1.7.48-staging/share/wine/mono
+    cp $WINETMP/wine_gecko-2.36-x86.msi $HOME/.wineversion/1.7.48-staging/share/wine/gecko
+    export WINE_EXEC=$HOME/.wineversion/1.7.48-staging/bin/
 }
 
-#检查wine是否安装
-if [ -f /usr/bin/wine ]
-then
-  echo
-  echo "原来你系统安装了Wine啊。那你的Wine版本够新吗，有1.7.35以上吗？"
-  echo "Play on Linux提供了Wine 1.7.48 staging的包，要不要试一下？（放心，不会替换系统原有版本的。）"
-  echo "如果你的Wine版本低于1.7.35，又不装1.7.48 staging的话，奉劝你还是别装Wine QQ了。"
-  read -p "y - 要！，n - 坚持用现有的Wine版本  " install_staging
-    if [ $install_staging = "y" ]
-      then
- echo
- echo "嗯，果然你还是想尝尝Wine 1.7.45 staging的嘛～"
- echo "不要谢我，这是Play on Linux编译的版本"
- echo
- get_wine_staging
-      else
- echo 
- echo "那你是坚持用自己的Wine咯…… 如果版本不达标，可别怪我啊"
- echo
- export WINE_EXEC=/usr/bin
-      fi
-else
-  echo
-  echo "不知道是此脚本无能，还是你没装Wine…… 总之就是没有找到你的Wine。"
-  echo "要不要试一下Wine 1.7.45 staging。这是Play on Linux提供的。"
-  read -p "按回车键继安装，如果不想安装按Ctrl-C退出。"
-  get_wine_staging
+    #检查wine是否安装
+    if [ -f /usr/bin/wine ]
+    then
+        echo
+        echo "原来你系统安装了Wine啊。那你的Wine版本够新吗，有1.7.35以上吗？"
+        echo "Play on Linux提供了Wine 1.7.48 staging的包，要不要试一下？（放心，不会替换系统原有版本的。）"
+        echo "如果你的Wine版本低于1.7.35，又不装1.7.48 staging的话，奉劝你还是别装Wine QQ了。"
+        read -p "y - 要！，n - 坚持用现有的Wine版本  " install_staging
+        if [ $install_staging = "y" ]
+        then
+            echo
+            echo "嗯，果然你还是想尝尝Wine 1.7.48 staging的嘛～"
+            echo "不要谢我，这是Play on Linux编译的版本"
+            echo
+            get_wine_staging
+        else
+            echo 
+            echo "那你是坚持用自己的Wine咯…… 如果版本不达标，可别怪我啊"
+            echo
+            export WINE_EXEC=/usr/bin/
+        fi
+    else
+        echo
+        echo "不知道是此脚本无能，还是你没装Wine…… 总之就是没有找到你的Wine。"
+        echo "要不要试一下Wine 1.7.48 staging。这是Play on Linux提供的。"
+        read -p "按回车键继安装，如果不想安装按Ctrl-C退出。"
+        get_wine_staging
   
-fi
+    fi
 }
 
 check_winetricks()
 {
 
-
-if [ -f /usr/bin/winetricks ]
-then
-  export WINETRICKS_EXEC=/usr/bin
-elif [ $HOME/.local/share/winetricks ]
-    then 
-      export WINETRICKS_EXEC=$HOME/.local/share
-else    
-  echo
-  read -p "没有找到winetricks，现在安装。若现在无法安装，请按Ctrl-C退出。"
-  wget https://raw.githubusercontent.com/Winetricks/winetricks/master/src/winetricks -p $HOME/.local/share -c
-  export WINETRICKS_EXEC=$HOME/.local/share
-  check_winetricks
-fi
+    if [ -f /usr/bin/winetricks ]
+    then
+        export WINETRICKS_EXEC=/usr/bin
+    elif [ -f $HOME/.local/share/winetricks ]
+        then 
+            export WINETRICKS_EXEC=$HOME/.local/share
+    else    
+        echo
+        read -p "没有找到winetricks，现在安装。若现在无法安装，请按Ctrl-C退出。"
+        wget https://raw.githubusercontent.com/Winetricks/winetricks/master/src/winetricks -p $HOME/.local/share -c
+        export WINETRICKS_EXEC=$HOME/.local/share
+        check_winetricks
+    fi
 }
 
-#为后面的检查做准备
-app_folder_ready=0
-icon_folder_ready=0
 
-check_folders()
-{
-  making_app_folder()
-  {
-    if [ -d $HOME/.local/share/applications ]
-    then 
-       app_folder_ready=1
-    elif [ -d $HOME/.local/share ]
-    then
-      mkdir $HOME/.local/share/applications
-    elif [ -d $HOME/.local ]
-    then
-      mkdir $HOME/.local/share
-    else 
-      mkdir $HOME/.local/ 
-    fi
-  }
-
-  making_icon_folder()
-  {
-  if [ -d $HOME/.local/share/icons ]
-    then 
-       icon_folder_ready=1
-    else
-      mkdir $HOME/.local/share/icons
-    fi
-  }
-  
-  if [ $app_folder_ready = 1 ]
-    then 
-      true
-    else
-      making_app_folder
-      check_folders
-  fi
-  
-  if [ $icon_folder_ready = 1 ]
-  then
-    true
-  else
-    making_icon_folder
-    check_folders
-  fi
-}
 
 create_bottle()
 {
@@ -366,8 +337,8 @@ then
   sudo rm /usr/share/wine/fonts/tahoma.ttf
   sudo rm /usr/share/wine/fonts/tahomabd.ttf
 else
-  rm $HOME/.wineversion/1.7.45-staging/share/wine/fonts/tahoma.ttf
-  rm $HOME/.wineversion/1.7.45-staging/share/wine/fonts/tahomabd.ttf
+  rm $HOME/.wineversion/1.7.48-staging/share/wine/fonts/tahoma.ttf
+  rm $HOME/.wineversion/1.7.48-staging/share/wine/fonts/tahomabd.ttf
 fi
 
 }
@@ -565,7 +536,7 @@ get_icon()
 {
 echo "从QQ.exe中扣图标，这下不算侵权了吧。。。"
 7z -y e $WINEPREFIX/drive_c/Program\ Files/Tencent/QQ/Bin/QQ.exe -o$WINETMP/qqicon >/dev/null
-cp $WINETMP/qqicon/4  $HOME/.local/share/icons/wineqq_icon.png
+cp $WINETMP/qqicon/4  $HOME/.local/share/icons/hicolor/256x256/apps/WineQQ.png
 }
 
 create_launcher()
@@ -574,7 +545,7 @@ echo "创建启动脚本"
 cat > $WINETMP/qq_launcher.sh <<EOF
 #!/bin/sh
 runqq()
- {
+{
 env  LC_ALL=zh_CN.UTF-8   TZ="Asia/Shanghai" WINEARCH=win32 WINEPREFIX=\$HOME/wineqq-bottle $WINE_EXEC/wine "C:\Program Files\Tencent\QQ\Bin\QQ.exe" >/dev/null 2>&1
 }
 
@@ -632,7 +603,7 @@ case \$1 in
   if [ -z \$1 ];
   then 
     runqq
-  else
+  else 
     echo "谁告诉你 \$1 这个选项的？"
     runhelp
   fi  
@@ -653,16 +624,16 @@ Name=QQ 7.3 Lite
 Comment=Tencent QQ Lite
 Categories=Network;
 Exec=\$HOME/wineqq-bottle/qq_launcher.sh
- Ic
+Icon=WineQQ
 Type=Application
 EOF
 cp $WINETMP/QQ.desktop $HOME/.local/share/applications/wineqq.desktop
 }
 
+check_folders
 check_dep
 check_wine
 check_winetricks
-check_folders
 create_bottle
 basedlls
 get_wenq_font
@@ -676,3 +647,4 @@ env WINEPREFIX=$WINEPREFIX LANG=$LANG WINEARCH=$WINEARCH TZ=$TZ $WINE_EXEC/wines
 #rm -rf $WINETMP
 echo "看起来都完成了～好啦，玩(或被玩)得愉快"
 exit 0
+ 
