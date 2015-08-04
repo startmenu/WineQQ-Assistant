@@ -1,4 +1,4 @@
-Wine-Assistant
+WineQQ Assistant
 ==============
 
-a Chinese Wine optimizer.
+A Bash sript helps you install QQ on Wine.
