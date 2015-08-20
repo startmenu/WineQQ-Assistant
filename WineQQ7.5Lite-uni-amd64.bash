@@ -381,5 +381,5 @@ EOF
 cp $WINETMP/QQ.desktop $HOME/.local/share/applications/wineqq.desktop
 $WINE_PATH/wineserver -k
 echo "安装完成！在主菜单中找到QQ的菜单项启动。"
-#rm -r $WINETMP
+rm -r $WINETMP
 exit 0
