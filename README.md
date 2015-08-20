@@ -2,6 +2,7 @@ WineQQ安装助手 - AOSC OS 3专用
 ==============
 
 此脚本将帮助你安装WineQQ。
+
 文件及说明：
 *  WineQQ7.5Lite-for-AOSC.bash - AOSC OS 3专用的WineQQ安装脚本，安装的版本是QQ 7.5 轻聊版
 *  WineQQ7.5Lite-uni-amd64.bash - 64位Linux通用版的WineQQ安装脚本，需要系统支持32位程序
