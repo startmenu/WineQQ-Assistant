@@ -240,6 +240,7 @@ get_qq()
 echo 
 echo "即将下载QQ 7.5轻聊版。也可以手动下载，之后放在$WINETMP里"
 echo "下载地址：http://dldir1.qq.com/qqfile/qq/QQ7.5Light/15462/QQ7.5Light.exe"
+read -p "按回车键继续，或按Ctrl+C退出脚本，手动下载后再运行"
 if wget http://dldir1.qq.com/qqfile/qq/QQ7.5Light/15462/QQ7.5Light.exe -P $WINETMP -c
 then
     true
@@ -357,7 +358,7 @@ case \$1 in
   then 
     runqq
   else 
-    echo "谁告诉你 $1 这个选项的？"
+    echo "谁告诉你 \$1 这个选项的？"
     runhelp
   fi  
   ;;
